@@ -1,0 +1,45 @@
+{
+  "name": "GitHub Agentic Workflows Development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "redhat.vscode-yaml",
+        "DavidAnson.vscode-markdownlint",
+        "github.vscode-github-actions"
+      ],
+      "settings": {
+        "github.copilot.chat.codeGeneration.instructions": [
+          {
+            "text": "agentic-workflows.agent.md",
+            "file": "../.github/agents/agentic-workflows.agent.md"
+          }
+        ],
+        "github.copilot.chat.workspaceContext": {
+          "alwaysInclude": [
+            "../.github/aw/github-agentic-workflows.md"
+          ]
+        },
+        "files.associations": {
+          "*.lock.yml": "yaml"
+        }
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "remoteUser": "vscode"
+}
