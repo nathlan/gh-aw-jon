@@ -5,6 +5,13 @@ echo "======================================"
 echo "Setting up GitHub Agentic Workflows development environment..."
 echo "======================================"
 
+# Check if gh CLI is available
+if ! command -v gh &> /dev/null; then
+    echo "⚠ GitHub CLI (gh) is not installed. The devcontainer features should install it."
+    echo "  If this error persists, check the devcontainer configuration."
+    exit 1
+fi
+
 # Install gh-aw CLI extension
 echo "Installing gh-aw CLI extension..."
 if ! gh extension list | grep -q "gh-aw"; then

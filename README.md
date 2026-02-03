@@ -11,6 +11,7 @@ The easiest way to get started is using the pre-configured dev container that in
 1. Install [Visual Studio Code](https://code.visualstudio.com/)
 2. Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 3. Install [Docker Desktop](https://www.docker.com/products/docker-desktop)
+   - **Windows users**: Works great with WSL2! See [WSL setup notes](.devcontainer/README.md#for-windows-including-wsl)
 4. Open this repository in VS Code
 5. Click "Reopen in Container" when prompted (or press F1 → "Dev Containers: Reopen in Container")
 
@@ -20,7 +21,9 @@ The dev container includes:
 - Node.js, Docker, and all development dependencies
 - Pre-configured VS Code settings for agentic workflows
 
-See [`.devcontainer/README.md`](.devcontainer/README.md) for more details.
+**✅ Works seamlessly in WSL2** - If you're using Windows with WSL, the dev container will automatically use your WSL2 Docker engine.
+
+See [`.devcontainer/README.md`](.devcontainer/README.md) for more details including WSL-specific setup.
 
 ### Option 2: Local Setup
 
