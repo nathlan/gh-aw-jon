@@ -32,7 +32,13 @@ If you prefer to work locally without a dev container:
 1. Install [GitHub CLI](https://cli.github.com/)
 2. Install the gh-aw extension:
    ```bash
+   # Official installation method (from github/gh-aw repository)
    curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh | bash
+   
+   # Or for security-conscious users, inspect the script first:
+   # curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh -o install-gh-aw.sh
+   # less install-gh-aw.sh  # Review the script
+   # bash install-gh-aw.sh
    ```
 3. Authenticate with GitHub:
    ```bash

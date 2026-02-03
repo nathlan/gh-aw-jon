@@ -180,8 +180,13 @@ For best performance, ensure:
 If `gh aw` commands don't work:
 
 ```bash
-# Reinstall the extension
+# Reinstall the extension using the official installation script
 curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh | bash
+
+# For security-conscious users, download and inspect first:
+# curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh -o /tmp/install.sh
+# less /tmp/install.sh  # Review the script
+# bash /tmp/install.sh
 
 # Verify installation
 gh extension list

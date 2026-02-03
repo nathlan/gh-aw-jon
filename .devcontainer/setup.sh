@@ -15,6 +15,11 @@ fi
 # Install gh-aw CLI extension
 echo "Installing gh-aw CLI extension..."
 if ! gh extension list | grep -q "gh-aw"; then
+    # Using official installation script from gh-aw repository
+    # Alternative: Download, inspect, then execute:
+    #   curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh -o /tmp/install-gh-aw.sh
+    #   less /tmp/install-gh-aw.sh  # Inspect the script
+    #   bash /tmp/install-gh-aw.sh
     curl -fsSL https://raw.githubusercontent.com/github/gh-aw/refs/heads/main/install-gh-aw.sh | bash
     echo "✓ gh-aw CLI extension installed"
 else
