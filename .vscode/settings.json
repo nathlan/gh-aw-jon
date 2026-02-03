@@ -1,0 +1,16 @@
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "agentic-workflows.agent.md",
+      "file": "../.github/agents/agentic-workflows.agent.md"
+    }
+  ],
+  "github.copilot.chat.workspaceContext": {
+    "alwaysInclude": [
+      "../.github/aw/github-agentic-workflows.md"
+    ]
+  },
+  "files.associations": {
+    "*.lock.yml": "yaml"
+  }
+}
