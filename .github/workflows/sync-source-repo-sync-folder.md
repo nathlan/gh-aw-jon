@@ -44,4 +44,4 @@ Then:
 
   cd <tmp>
   git sparse-checkout set sync
-  rsync -a --delete "<tmp>/sync/" "$GITHUB_WORKSPACE/sync/"
+  rsync -a "<tmp>/sync/" "$GITHUB_WORKSPACE/sync/"
