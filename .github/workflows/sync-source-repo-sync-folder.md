@@ -22,8 +22,9 @@ network:
     - "github.com"
 safe-outputs:
   create-pull-request:
-    title-prefix: "[sync] "
+    title-prefix: "[source-repo-sync] "
     labels: [automation]
+    draft: false
 ---
 
 # Sync /sync folder
