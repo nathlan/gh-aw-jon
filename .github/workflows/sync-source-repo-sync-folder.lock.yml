@@ -21,7 +21,7 @@
 #
 # Sync /sync from nathlan/source-repo@main into this repository.
 #
-# frontmatter-hash: a9df08bd97e58592ee492c123889aed3ca37a6850d7e24f264011af0d4f738c5
+# frontmatter-hash: 114d9a1f503c40dd6c0287d0b158bb0802d0d425089d884b289cb8cf84859a5d
 
 name: "Sync /sync folder"
 "on":
@@ -98,7 +98,9 @@ jobs:
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
         with:
           app-id: ${{ vars.SOURCE_REPO_SYNC_APP_ID }}
+          owner: nathlan
           private-key: ${{ secrets.SOURCE_REPO_SYNC_APP_PRIVATE_KEY }}
+          repositories: source-repo
       - env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         name: Export GH_TOKEN

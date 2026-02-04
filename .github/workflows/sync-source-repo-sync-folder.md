@@ -11,6 +11,8 @@ steps:
     with:
       app-id: ${{ vars.SOURCE_REPO_SYNC_APP_ID }}
       private-key: ${{ secrets.SOURCE_REPO_SYNC_APP_PRIVATE_KEY }}
+      owner: nathlan
+      repositories: source-repo
   - name: Export GH_TOKEN
     env:
       GH_TOKEN: ${{ steps.generate-token.outputs.token }}
