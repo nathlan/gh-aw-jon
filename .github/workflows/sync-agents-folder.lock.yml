@@ -21,7 +21,7 @@
 #
 # Sync /agents from nathlan/.github-private@main into this repository.
 #
-# frontmatter-hash: 6174b41d7b6c76154a6059eec8408cc3a8c5e8e594689668ba9919f52f030b2a
+# frontmatter-hash: 9d882691aa4b7792ae00474b0081b97ea85f0f1cf5dade8f4f4e81bf8003a3ae
 
 name: "Sync agents folder"
 "on":
@@ -712,6 +712,9 @@ jobs:
           # AWF runs with sudo, creating files owned by root
           sudo chmod -R a+r /tmp/gh-aw/sandbox/firewall/logs 2>/dev/null || true
           awf logs summary | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fix gh-aw log permissions
+        run: sudo chmod -R a+r /tmp/gh-aw/mcp-logs /tmp/gh-aw/sandbox || true
+
       - name: Upload agent artifacts
         if: always()
         continue-on-error: true
