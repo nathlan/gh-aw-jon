@@ -21,7 +21,7 @@
 #
 # Sync /agents from nathlan/.github-private@main into this repository.
 #
-# frontmatter-hash: 9d882691aa4b7792ae00474b0081b97ea85f0f1cf5dade8f4f4e81bf8003a3ae
+# frontmatter-hash: 02694a8e6ba6d9d181cc24ad50ab720a3d51a125c0e9e6ca9dfd90f98dfa492f
 
 name: "Sync agents folder"
 "on":
@@ -49,7 +49,7 @@ jobs:
       comment_repo: ""
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@v0.40.0
+        uses: github/gh-aw/actions/setup@76d37d925abd44fee97379206f105b74b91a285b # v0.40.0
         with:
           destination: /opt/gh-aw/actions
       - name: Check workflow file timestamps
@@ -90,7 +90,7 @@ jobs:
       secret_verification_result: ${{ steps.validate-secret.outputs.verification_result }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@v0.40.0
+        uses: github/gh-aw/actions/setup@76d37d925abd44fee97379206f105b74b91a285b # v0.40.0
         with:
           destination: /opt/gh-aw/actions
       - name: Checkout repository
@@ -712,8 +712,8 @@ jobs:
           # AWF runs with sudo, creating files owned by root
           sudo chmod -R a+r /tmp/gh-aw/sandbox/firewall/logs 2>/dev/null || true
           awf logs summary | tee -a "$GITHUB_STEP_SUMMARY"
-      - name: Fix gh-aw log permissions
-        run: sudo chmod -R a+r /tmp/gh-aw/mcp-logs /tmp/gh-aw/sandbox || true
+      - name: Fix log file permissions
+        run: chmod -R a+r /tmp/gh-aw/mcp-logs
 
       - name: Upload agent artifacts
         if: always()
@@ -749,7 +749,7 @@ jobs:
       total_count: ${{ steps.missing_tool.outputs.total_count }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@v0.40.0
+        uses: github/gh-aw/actions/setup@76d37d925abd44fee97379206f105b74b91a285b # v0.40.0
         with:
           destination: /opt/gh-aw/actions
       - name: Debug job inputs
@@ -862,7 +862,7 @@ jobs:
       success: ${{ steps.parse_results.outputs.success }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@v0.40.0
+        uses: github/gh-aw/actions/setup@76d37d925abd44fee97379206f105b74b91a285b # v0.40.0
         with:
           destination: /opt/gh-aw/actions
       - name: Download agent artifacts
@@ -972,7 +972,7 @@ jobs:
       process_safe_outputs_temporary_id_map: ${{ steps.process_safe_outputs.outputs.temporary_id_map }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@v0.40.0
+        uses: github/gh-aw/actions/setup@76d37d925abd44fee97379206f105b74b91a285b # v0.40.0
         with:
           destination: /opt/gh-aw/actions
       - name: Download agent output artifact

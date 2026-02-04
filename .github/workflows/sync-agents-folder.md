@@ -13,8 +13,8 @@ permissions:
 env:
   SYNC_REPO_TOKEN: ${{ secrets.SYNC_REPO_TOKEN }}
 post-steps:
-  - name: Fix gh-aw log permissions
-    run: sudo chmod -R a+r /tmp/gh-aw/mcp-logs /tmp/gh-aw/sandbox || true
+  - name: Fix log file permissions
+    run: chmod -R a+r /tmp/gh-aw/mcp-logs
 network:
   allowed:
     - "github.com"
