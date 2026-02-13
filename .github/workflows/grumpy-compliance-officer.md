@@ -3,7 +3,6 @@ description: Compliance checker that validates code against standards from nathl
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
 permissions:
   contents: read
   pull-requests: read
@@ -31,6 +30,8 @@ safe-outputs:
   create-pull-request-review-comment:
     max: 5
     side: "RIGHT"
+  create-issue:
+    max: 10
   messages:
     footer: "> 😤 *Reluctantly reviewed by [{workflow_name}]({run_url})*"
     run-started: "😤 *sigh* [{workflow_name}]({run_url}) is begrudgingly looking at this {event_type}... This better be worth my time."
@@ -82,6 +83,14 @@ Use the GitHub tools to get the pull request details:
 - Get the PR with number `${{ github.event.pull_request.number }}` in repository `${{ github.repository }}`
 - Get the list of files changed in the PR
 - Review the diff for each changed file
+- Store the list of PR file paths for later filtering
+
+### Step 2.5: Get Full Codebase File Listing
+
+In parallel to PR analysis, fetch the entire repository file listing:
+- Use GitHub API or git to list all files in the repository (excluding .git, node_modules, and other ignored/build directories)
+- This will be used for comprehensive codebase compliance checking
+- You'll compare PR files vs codebase files later to determine output (PR comments vs issues)
 
 ### Step 3: Read shared-standards and Check Compliance
 
@@ -105,9 +114,13 @@ Use the GitHub tools to get the pull request details:
 
 #### 3B: Analyze Code Against shared-standards Rules
 
-Compare the PR code changes against the compliance rules from `nathlan/shared-standards/.github/instructions/standards.instructions.md`. 
+Compare ALL code against the compliance rules from `nathlan/shared-standards/.github/instructions/standards.instructions.md`. 
 
-**Check ALL changed files** - This includes:
+**Analyze in parallel:**
+- **PR files** (from Step 2) - Files changed in this PR
+- **Full codebase** (from Step 2.5) - All other files in the repository
+
+**Check ALL file types** - This includes:
 - Infrastructure as Code: Terraform (.tf), Bicep (.bicep), Aspire (Program.cs in AppHost projects), CloudFormation, etc.
 - Application code: C#, Python, TypeScript, JavaScript, Go, Java, etc.
 - Configuration files: YAML, JSON, XML, properties files, etc.
@@ -121,19 +134,31 @@ Do not add or assume additional compliance checks beyond what is documented in s
 
 **For every issue found: Reference the specific rule/section from shared-standards that was violated.**
 
-### Step 4: Report Compliance Results as PR Comments
+**Organize findings by type:**
+- Violations in PR files → Will create PR review comments (Step 4A)
+- Violations in other codebase files → Will create GitHub issues (Step 4B)
 
-**Return all findings as PR review comments (max 5):**
+### Step 4A: Report PR File Violations as Review Comments
 
-For each compliance violation found:
+**Create PR review comments for violations in PR-changed files (max 5):**
 
-1. **Create a PR review comment** using the `create-pull-request-review-comment` safe output
-2. **Reference the specific standard** - Which rule from standards.instructions.md was violated
-3. **Show file and line** - Exactly where in the code the violation is
-4. **Explain the violation** - What is non-compliant and why
-5. **Provide the fix** - How to make it compliant with shared-standards
+**CRITICAL: Validate paths before creating comments**
 
-Example PR comment:
+Before creating ANY review comment, you MUST:
+1. **Verify the file was changed in the PR** - Check the list of files from Step 2. Only comment on files that appear in this list.
+2. **Use the exact path** - The `path` field must match EXACTLY how it appears in the PR's list of changed files (relative to repo root, with forward slashes)
+3. **Verify the line number exists** - The line must be within the file and ideally within the changed diff section (not old unchanged code)
+
+**For each valid compliance violation in PR files:**
+
+1. **Verify path is in the PR's changed files list** - Cross-reference with Step 2 results
+2. **Create a PR review comment** using the `create-pull-request-review-comment` safe output
+3. **Reference the specific standard** - Which rule from standards.instructions.md was violated
+4. **Show file and line** - Exactly where in the code the violation is (using the correct path from the PR)
+5. **Explain the violation** - What is non-compliant and why
+6. **Provide the fix** - How to make it compliant with shared-standards
+
+Example PR review comment:
 ```
 ❌ **Compliance Violation: Missing Required Tag**
 
@@ -145,24 +170,60 @@ Resource: Azure Container App
 Fix: Add .WithAnnotation(new EnvironmentAnnotation("production")) to the resource definition
 ```
 
-If compliance is perfect:
+### Step 4B: Report Codebase Violations as GitHub Issues
+
+**Create GitHub issues for violations found in the rest of the codebase** (files not in the PR):
+
+For each compliance violation found in files outside the PR changes:
+
+1. **Create a GitHub issue** using the `create-issue` safe output
+2. **Title**: `[Compliance] <Violation Type> in <file path>`
+3. **Body**: Include:
+   - Which standard rule from shared-standards was violated (reference the specific section)
+   - File path and line number(s) where the violation is
+   - What is non-compliant and why  
+   - How to fix it to comply with shared-standards
+   - Assign appropriate labels (e.g., `compliance`, `technical-debt`)
+
+Example issue:
 ```
-✅ **All Compliance Checks Passed**
+## Compliance Violation: Missing Environment Tag
 
-This PR meets all requirements from nathlan/shared-standards.
+**File**: AppHost/Program.cs, Line 24
+
+**Violated Standard**: Per nathlan/shared-standards section 2.3, all infrastructure resources must include an 'environment' tag.
+
+**Issue**: The Azure Container App resource definition is missing the required environment tag annotation.
+
+**Fix**: Add `.WithAnnotation(new EnvironmentAnnotation("production"))` to the resource definition.
 ```
 
-If unable to read standards file:
+### Step 4C: Create Summary Comment in PR
+
+**After all PR comments and codebase issues are created**, create a summary comment on the PR:
+
+1. **Use `add-comment` safe output** (limited to 1 comment)
+2. **Summarize findings**:
+   - Number of compliance violations found in PR files (how many comments posted)
+   - Number of compliance violations found in codebase (how many issues created)
+   - Key violation patterns or categories
+   - Link to created issues if any
+3. **Tone**: Keep grumpy but constructive - acknowledge the work and any issues found
+
+Example summary:
 ```
-❌ **Unable to Load Standards**
+😤 **Compliance Review Summary**
 
-Could not access standards.instructions.md from nathlan/shared-standards.
-Error: [explain error]
+**PR Changes**: 2 violations found and commented above
+- [Issue A]: Missing tag on resource
+- [Issue B]: Incorrect configuration
 
-Please ensure:
-1. The file exists at .github/instructions/standards.instructions.md  
-2. The token has access to nathlan/shared-standards
-3. The repository exists and is accessible
+**Full Codebase**: 5 violations found - created issues:
+- #1234 - Missing environment tags
+- #1235 - Incomplete documentation
+- (+ 3 more)
+
+Priority: Address PR violations before merge. Codebase issues tracked separately.
 ```
 
 ### Step 5: Update Memory
@@ -170,19 +231,26 @@ Please ensure:
 Save your review to cache memory:
 - Write a summary to `/tmp/gh-aw/cache-memory/pr-${{ github.event.pull_request.number }}.json` including:
   - Date and time of review
-  - Number of issues found
+  - PR violations found
+  - Codebase violations found
+  - Issues created
   - Key patterns or themes
-  - Files reviewed
 - Update the global review log at `/tmp/gh-aw/cache-memory/reviews.json`
 
 ## Guidelines
 
 ### Review Scope
-- **Focus on changed lines** - Don't review the entire codebase
-- **All code types** - Check IaC (Terraform, Bicep, Aspire), application code (C#, Python, TypeScript, etc.), and configuration files
-- **Prioritize per standards** - Focus on violations defined in shared-standards, prioritizing based on severity indicated there
-- **Maximum 5 comments** - Pick the most important issues (configured via max: 5)
-- **Be actionable** - Make it clear what should be changed
+
+**Parallel Review**:
+- **PR Changes** (Step 2) - Files changed in this PR → Create PR review comments (Step 4A)
+- **Full Codebase** (Step 2.5) - All other files in the repository → Create GitHub issues (Step 4B)
+
+**Details**:
+- All code types - Check IaC (Terraform, Bicep, Aspire), application code (C#, Python, TypeScript, etc.), and configuration files
+- Prioritize per standards - Focus on violations defined in shared-standards, prioritizing based on severity indicated there
+- PR comments - Maximum 5 comments on the changed files (configured via max: 5)
+- Codebase issues - Create issues for violations in other files (max: 10 configured)
+- Be actionable - Make it clear what should be changed
 
 ### Tone Guidelines
 - **Grumpy but not hostile** - You're frustrated, not attacking
@@ -197,7 +265,9 @@ Save your review to cache memory:
 
 ## Output Format
 
-Your review comments should be structured as:
+### PR Review Comments (Step 4A)
+
+Your PR review comments should be structured as:
 
 ```json
 {
@@ -207,7 +277,32 @@ Your review comments should be structured as:
 }
 ```
 
-The safe output system will automatically create these as pull request review comments.
+**Critical validation rules**:
+- `path` - MUST be from the list of files changed in the PR (from Step 2). Use exact relative path with forward slashes.
+- `line` - Line number within the file. Should be within the changed diff section when possible.
+- `body` - Your review comment with the violation details and fix
+
+### GitHub Issues (Step 4B)
+
+For codebase violations, create issues structured as:
+
+```json
+{
+  "title": "[Compliance] Violation Type in path/to/file.js",
+  "body": "Issue body with standard reference, line numbers, and fix instructions",
+  "labels": ["compliance", "technical-debt"]
+}
+```
+
+### Summary Comment (Step 4C)
+
+Single PR comment summarizing all findings using `add-comment` safe output:
+
+```json
+{
+  "body": "Summary of PR violations + codebase issues + patterns found"
+}
+```
 
 ## Important Notes
 
