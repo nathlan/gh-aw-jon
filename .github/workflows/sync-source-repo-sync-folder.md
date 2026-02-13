@@ -1,6 +1,6 @@
 ---
-name: Sync all folders from source-repo
-description: Sync all folders from nathlan/source-repo@main into this repository, excluding important repo files.
+name: Sync /sync folder
+description: Sync /sync from nathlan/source-repo@main into this repository.
 on:
   schedule: daily
 permissions: read-all
@@ -27,38 +27,22 @@ safe-outputs:
     draft: false
 ---
 
-# Sync all folders from source-repo
+# Sync /sync folder
 
-Sync **all folders** from nathlan/source-repo@main into this repository, excluding important repo-level files. This merges upstream directories into local directories (no deletions of local-only files) and opens a pull request with the changes.
-
-## Exclusions
-
-Do **NOT** sync any of these from the source repo:
-- `.git/`, `.github/` — git internals and workflow configs
-- `README.md`, `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` — repo-level docs
-- `.gitignore`, `.gitattributes` — git config files
-- `.env`, `.env.*` — environment/secret files
-
-Only **directories** (folders) from the source repo root should be synced.
+Sync the /sync folder from nathlan/source-repo@main into /sync in this repository. This merges upstream files into the local folder (no deletions of local-only files) and opens a pull request with the changes.
 
 ## Steps
 
-1) Use bash to do a full shallow clone of nathlan/source-repo@main using the GH app token (in `GH_TOKEN`).
-2) Iterate over all top-level **directories** in the cloned repo and rsync each one into `$GITHUB_WORKSPACE`, skipping `.git/` and `.github/`.
-3) Check `git status` for changes. If there are changes, use the `create_pull_request` safe output tool to open a PR. Do **NOT** try to `git push` yourself — the safe-outputs job handles pushing and PR creation automatically.
-
-**Important**: The `GH_TOKEN` env var is ONLY for cloning the private source repo. Do NOT use it to push or set the remote URL. Do NOT run `git push` at all. Just commit your changes locally and call the `create_pull_request` tool.
+1) Use bash to clone nathlan/source-repo@main with sparse-checkout for the /sync folder using the GH app token (in `GH_TOKEN`).
+2) Merge the remote /sync folder into ./sync (do not delete local-only files).
+3) Summarize the changes and let the safe output job create the pull request.
 
 Use this clone command (requires `GH_TOKEN`):
 
-  git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/nathlan/source-repo.git" /tmp/source-repo
+  git clone --depth 1 --filter=blob:none --sparse "https://x-access-token:${GH_TOKEN}@github.com/nathlan/source-repo.git" <tmp>
 
-Then sync all folders, excluding .git and .github:
+Then:
 
-  cd /tmp/source-repo
-  for dir in */; do
-    case "$dir" in
-      .git/|.github/) continue ;;
-    esac
-    rsync -a "/tmp/source-repo/$dir" "$GITHUB_WORKSPACE/$dir"
-  done
+  cd <tmp>
+  git sparse-checkout set sync
+  rsync -a "<tmp>/sync/" "$GITHUB_WORKSPACE/sync/"
